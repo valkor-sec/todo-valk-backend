@@ -3,7 +3,6 @@ const router = express.Router();
 const Task = require("../models/Task");
 const authMiddleware = require("../middleware/authMiddleware");
 
-
 // ➕ CREATE TASK
 router.post("/", authMiddleware, async (req, res) => {
     try {
@@ -21,7 +20,7 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 
-// 📋 GET USER TASKS
+// 📋 GET TASKS
 router.get("/", authMiddleware, async (req, res) => {
     try {
         const tasks = await Task.find({ user: req.user.id });
@@ -33,7 +32,7 @@ router.get("/", authMiddleware, async (req, res) => {
 });
 
 
-// ✔ TOGGLE TASK (done / not done)
+// ✔ TOGGLE TASK
 router.put("/:id", authMiddleware, async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
@@ -46,11 +45,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
             return res.status(401).json({ message: "Non autorisé" });
         }
 
-        // 🔄 toggle
         task.completed = !task.completed;
-
-        // 🆕 gestion date completion
-        task.completedAt = task.completed ? new Date() : null;
 
         await task.save();
 
