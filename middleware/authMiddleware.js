@@ -2,22 +2,26 @@ const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
     try {
-        const token = req.header("Authorization");
+        const authHeader = req.header("Authorization");
 
-        if (!token) {
+        if (!authHeader) {
             return res.status(401).json({ message: "Accès refusé, token manquant" });
         }
 
-        // format: Bearer token
-        const realToken = token.split(" ")[1];
+        // Vérification format Bearer
+        if (!authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ message: "Format token invalide" });
+        }
 
-        const verified = jwt.verify(realToken, process.env.JWT_SECRET);
+        const token = authHeader.replace("Bearer ", "");
+
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
 
         req.user = verified;
         next();
 
     } catch (err) {
-        res.status(401).json({ message: "Token invalide" });
+        return res.status(401).json({ message: "Token invalide" });
     }
 };
 
